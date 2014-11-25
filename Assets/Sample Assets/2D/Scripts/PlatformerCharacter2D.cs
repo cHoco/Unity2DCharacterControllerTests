@@ -22,6 +22,7 @@ public class PlatformerCharacter2D : MonoBehaviour
 	Animator anim;										// Reference to the player's animator component.
 
 	float grabRadius = 6.0f;
+    float grabAngle = 90.0f; //degrees
 	float grabForce = 1000.0f;
 	float platformGrabAdditionalMovement = 4.0f;
 	float grabMovementSpeed = 25.0f;
@@ -116,10 +117,16 @@ public class PlatformerCharacter2D : MonoBehaviour
 			// To identify grabbable entities we cast a circle
 			RaycastHit2D[] grabbableObjects = Physics2D.CircleCastAll(transform.position, grabRadius, Vector2.zero, 0.0f, layerMask);
 
-			// TODO: For each hitted target we remove the ones that aren't front-facing the character and aren't in a specific angle range 
+            Vector2 xVector = new Vector2(facingRight ? 1f : -1f, 0f);
+
 			foreach(RaycastHit2D inRange in grabbableObjects) {
+			    // PARTIALY DONE: For each hitted target we remove the ones that aren't front-facing the character and aren't in a specific angle range
+                Vector2 collisionDirection = (inRange.point - (Vector2)(transform.position)).normalized;
+                if ( Vector2.Angle(xVector, collisionDirection) > grabAngle )
+                    continue;
+
 				// For each hitted target we cast another Ray since CircleCast functionn is bugged and the hit points are accurate!
-				RaycastHit2D[] hitted = Physics2D.RaycastAll(transform.position, (inRange.point - (Vector2)(transform.position)).normalized, grabRadius, layerMask);
+				RaycastHit2D[] hitted = Physics2D.RaycastAll(transform.position, collisionDirection, grabRadius, layerMask);
 
 				if ( hitted.Length > 0 ) {
 					// TODO: right now only "platform" grabbing implemented, here we should check if the grabbed object is a platform or an enemy and act accordingly
